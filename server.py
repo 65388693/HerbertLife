@@ -3,18 +3,24 @@ from database.models import init_database, get_tasks
 
 app = FastAPI()
 
-# init DB au démarrage
 init_database()
 
 
 @app.get("/")
 def home():
-    return {"status": "Herbert API Cloud OK"}
+    return {
+        "app": "Herbert Life",
+        "status": "online",
+        "version": "1.0"
+    }
 
 
 @app.get("/tasks")
 def tasks():
-    return get_tasks()
+    return {
+        "count": len(get_tasks()),
+        "tasks": get_tasks()
+    }
 
 
 @app.get("/dashboard")
@@ -24,13 +30,16 @@ def dashboard():
 
     total = len(tasks)
     done = len([t for t in tasks if t["completed"]])
-    late = len([t for t in tasks if not t["completed"]])
+    pending = total - done
 
     rate = round((done / total * 100), 2) if total > 0 else 0
 
     return {
-        "total": total,
-        "done": done,
-        "late": late,
-        "rate": rate
+        "stats": {
+            "total": total,
+            "done": done,
+            "pending": pending,
+            "completion_rate": rate
+        },
+        "tasks": tasks
     }
